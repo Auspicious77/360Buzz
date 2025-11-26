@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "731804418402",
+    "project_id": "remoting-67217",
+    "storage_bucket": "remoting-67217.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:731804418402:android:6dc1ea5261767a99742c3b",
+        "android_client_info": {
+          "package_name": "com.remotingwork.assessment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "731804418402-aj2p602m27bij0qiv097ocg3k9ivcqqm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCn4916h6PIdOY4wz29298OUtuViSycqY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "731804418402-aj2p602m27bij0qiv097ocg3k9ivcqqm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "731804418402-de24qevuulo3klc5edlr8rv8fd0gif9n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.remotingwork.assessment"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

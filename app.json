@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Remoting Work Assessment",
+    "slug": "remoting-work-assessment",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/buzzlogo.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "remotingwork",
+    "splash": {
+      "image": "./assets/buzzlogo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.remotingwork.assessment",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "1:731804418402:ios:83ed3e6c1279885b742c3b"
+        }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/buzzlogo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.remotingwork.assessment",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin"
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "newArchEnabled": true
+          },
+          "ios": {
+            "newArchEnabled": true
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
