@@ -1,6 +1,6 @@
 # React Native Developer Assessment
 
-A professional mobile application built with React Native, Expo Router, and Firebase for the remoting.work developer assessment.
+A professional mobile application built with React Native, Expo, Expo Router, and Firebase for the remoting.work developer assessment.
 
 ## 🚀 Quick Start
 
@@ -152,9 +152,6 @@ eas build --platform android --profile preview
 eas build --platform ios --profile preview
 ```
 
-## 📞 Support
-
-For assessment review or questions, please contact the developer.
 
 ---
 
