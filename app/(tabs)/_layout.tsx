@@ -54,6 +54,23 @@ function TabBarButton({ children, onPress, accessibilityState }: any) {
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
 
+  // Calculate proper height based on platform and safe area insets
+  const getTabBarHeight = () => {
+    if (Platform.OS === 'ios') {
+      return 70 + insets.bottom;
+    }
+    // For Android, add bottom inset if it exists (for gesture navigation)
+    return 70 + (insets.bottom > 0 ? insets.bottom : 10);
+  };
+
+  const getPaddingBottom = () => {
+    if (Platform.OS === 'ios') {
+      return insets.bottom;
+    }
+    // For Android, use bottom inset if available, otherwise default padding
+    return insets.bottom > 0 ? insets.bottom : 10;
+  };
+
   return (
     <Tabs
       screenOptions={{
@@ -66,27 +83,27 @@ export default function TabsLayout() {
           left: 0,
           right: 0,
           elevation: 8,
-          alignItems: 'center',
           borderTopWidth: 1,
           borderTopColor: '#E5E5E5',
           backgroundColor: '#FFFFFF',
-          height: Platform.select({
-            ios: 70 + insets.bottom,
-            android: 80,
-          }),
-          paddingBottom: Platform.select({
-            ios: insets.bottom,
-            android: 10,
-          }),
+          height: getTabBarHeight(),
+          paddingBottom: getPaddingBottom(),
           paddingTop: 10,
           paddingHorizontal: 12,
+          // Add shadow for iOS
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontFamily: 'DMSans-SemiBold',
           marginTop: 4,
           textAlign: 'center',
-          alignSelf: 'center'
         },
         tabBarItemStyle: {
           paddingVertical: 5,
