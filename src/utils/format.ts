@@ -2,6 +2,11 @@
  * Formatting utility functions
  */
 
+import { Dimensions } from "react-native";
+
+export const SCREEN_WIDTH: number = Dimensions.get('window').width;
+export const SCREEN_HEIGHT: number = Dimensions.get('window').height;
+
 export const formatDate = (date: string | Date): string => {
   const d = new Date(date);
   return d.toLocaleDateString('en-US', {

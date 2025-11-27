@@ -1,49 +1,48 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
+import { View, ActivityIndicator } from 'react-native';
 import { SplashScreen } from '../src/components';
 import { useAuthStore } from '../src/store';
 
 export default function Index() {
   const router = useRouter();
-  const { isAuthenticated, user, isLoading, skipRedirect } = useAuthStore();
+  const { isAuthenticated, user, isLoading } = useAuthStore();
   const [showSplash, setShowSplash] = useState(true);
-  const [hasRedirected, setHasRedirected] = useState(false);
-
-  console.log('Index render - isAuthenticated:', isAuthenticated, 'user:', user, 'isLoading:', isLoading, 'skipRedirect:', skipRedirect);
+  const [hasNavigated, setHasNavigated] = useState(false);
 
   useEffect(() => {
-    // Skip redirect if user just registered (success modal should show first)
-  
-
-    // Redirect after splash is finished and auth check is complete
-    if (!showSplash && !isLoading && !hasRedirected) {
-      const redirect = () => {
+    // Wait for auth to be loaded before making navigation decision
+    if (!showSplash && !isLoading && !hasNavigated) {
+      console.log('Ready to navigate - Auth loaded:', isAuthenticated);
+      
+      setHasNavigated(true);
+      
+      // Use requestAnimationFrame for smoother transition
+      requestAnimationFrame(() => {
         if (isAuthenticated && user) {
-          console.log('User authenticated, redirecting to dashboard');
-          setHasRedirected(true);
+          console.log('Navigating to tabs');
           router.replace('/(tabs)');
         } else {
-          console.log('User not authenticated, redirecting to login');
-          setHasRedirected(true);
+          console.log('Navigating to login');
           router.replace('/(auth)/login');
         }
-      };
-
-      // Small delay to ensure smooth transition
-      const timer = setTimeout(redirect, 100);
-      return;
+      });
     }
-  }, [showSplash, isAuthenticated, user, isLoading, hasRedirected, skipRedirect, router]);
+  }, [showSplash, isLoading, hasNavigated, isAuthenticated, user]);
 
   const handleSplashFinish = () => {
-    console.log('Splash screen finished');
-    setShowSplash(false);
+    console.log('Splash finished');
+    // Small delay to ensure smooth transition
+    setTimeout(() => {
+      setShowSplash(false);
+    }, 100);
   };
 
-  // Show splash screen while loading or waiting for auth
-  if (showSplash || isLoading || hasRedirected) {
+  // Show splash or loading indicator
+  if (showSplash || isLoading || hasNavigated) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
-  return null;
+  // Fallback loading state
+  return <SplashScreen onFinish={handleSplashFinish} />;
 }

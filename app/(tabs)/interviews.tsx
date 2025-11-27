@@ -66,11 +66,11 @@ export default function InterviewsScreen() {
                   />
                 </View>
                 <View style={styles.interviewInfo}>
-                  <Text style={styles.interviewName}>{interview.name}</Text>
+                  <SmallText style={styles.interviewName}>{interview.name}</SmallText>
                   <SmallText color="#666666">{interview.role}</SmallText>
                 </View>
                 <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>Confirmed</Text>
+                  <SmallText style={styles.statusText}>Confirmed</SmallText>
                 </View>
               </View>
 
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   interviewName: {
     fontSize: 16,
-    fontWeight: '700',
+    // fontWeight: '700',
     color: '#000000',
     marginBottom: 2,
     fontFamily: 'DMSans-Bold',

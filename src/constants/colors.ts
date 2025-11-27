@@ -37,6 +37,7 @@ export const Colors = {
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
+  dark: '#212121ff',
   overlay: 'rgba(0, 0, 0, 0.5)',
 } as const;
 

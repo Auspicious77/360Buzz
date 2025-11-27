@@ -12,15 +12,13 @@ import {
 } from 'firebase/auth';
 
 interface AuthStore extends AuthState {
-  skipRedirect: boolean;
   initialize: () => () => void;
   login: (credentials: LoginCredentials) => Promise<void>;
-  register: (credentials: RegisterCredentials) => Promise<void>;
+  register: (credentials: RegisterCredentials) => Promise<User>;
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   setLoading: (loading: boolean) => void;
-  setSkipRedirect: (skip: boolean) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -31,7 +29,6 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       isAuthenticated: false,
       isLoading: true,
-      skipRedirect: false, // New flag to prevent auto-redirect
 
       // Actions
       setUser: (user) => {
@@ -46,26 +43,14 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading });
       },
 
-      setSkipRedirect: (skip) => {
-        set({ skipRedirect: skip });
-      },
-
       initialize: () => {
         console.log('Initializing auth listener...');
         
-        // Listen to Firebase auth state changes
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: any) => {
           console.log('Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out');
           
-          // Don't update state if we're in registration flow
-          if (get().skipRedirect) {
-            console.log('Skipping auth state update during registration');
-            return;
-          }
-          
           if (firebaseUser) {
             try {
-              // Get user data from Firestore
               const userDocRef = doc(db, 'users', firebaseUser.uid);
               const userDoc = await getDoc(userDocRef);
               
@@ -103,9 +88,8 @@ export const useAuthStore = create<AuthStore>()(
                 });
               }
             } catch (error: any) {
-              console.error('Error fetching user data:', error);
+              console.log('Error fetching user data:', error);
               
-              // For offline errors, use basic Firebase auth data
               if (error?.code === 'unavailable' || error?.message?.includes('offline')) {
                 const token = await firebaseUser.getIdToken();
                 set({
@@ -198,7 +182,7 @@ export const useAuthStore = create<AuthStore>()(
 
       register: async (credentials: RegisterCredentials) => {
         try {
-          set({ isLoading: true, skipRedirect: true }); // Set skip flag
+          set({ isLoading: true });
           
           console.log('Creating Firebase auth user...');
           
@@ -234,21 +218,17 @@ export const useAuthStore = create<AuthStore>()(
             ...userData,
           };
           
-          console.log('Registration complete, setting user state');
+          console.log('Registration complete - returning user without updating store');
           
-          // Set user but keep skipRedirect true
-          set({
-            user,
-            token,
-            isAuthenticated: true,
-            isLoading: false,
-            skipRedirect: true, // Keep this true so Index doesn't redirect
-          });
+          // DON'T update the store yet - just return the user data
+          // The store will remain unauthenticated until we manually set it
+          set({ isLoading: false });
           
-          console.log('Registration successful');
+          // Return the user data so the registration screen can show success modal
+          return user;
         } catch (error: any) {
           console.error('Registration error:', error);
-          set({ isLoading: false, skipRedirect: false });
+          set({ isLoading: false });
           throw error;
         }
       },
@@ -264,7 +244,6 @@ export const useAuthStore = create<AuthStore>()(
             token: null,
             isAuthenticated: false,
             isLoading: false,
-            skipRedirect: false,
           });
         } catch (error) {
           console.error('Logout error:', error);

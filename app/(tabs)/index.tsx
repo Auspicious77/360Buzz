@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput 
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store';
 import { Header, Heading4, SmallText } from '../../src/components';
-import { Colors } from '@/constants';
+import { Colors, Spacing } from '@/constants';
 
 // Mock data for update cards
 const UPDATE_DATA = [
@@ -179,7 +179,7 @@ export default function DashboardScreen() {
             </View>
             <View style={styles.interviewDetails}>
               <Heading4 style={styles.interviewTitle}>Interview with Sarah A. in 1 hour</Heading4>
-              <SmallText color={Colors.primary} style={{ fontSize: 12 }}>Downtown medical centre</SmallText>
+              <SmallText color={Colors.primary} style={{ fontSize: 12.5 }}>Downtown medical centre</SmallText>
               <TouchableOpacity style={styles.joinButton}>
                 <Text style={styles.joinButtonText}>Join interview</Text>
               </TouchableOpacity>
@@ -235,6 +235,8 @@ export default function DashboardScreen() {
             </View>
           )}
         </View>
+
+        <View style={{paddingVertical: Spacing.xl}}/>
       </ScrollView>
     </View>
   );
@@ -246,6 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
+    paddingBottom: 70
   },
   scrollView: {
     flex: 1,
@@ -335,7 +338,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   interviewTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     color: Colors.primary,
     fontFamily: 'DMSans-Bold',
@@ -418,7 +421,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 16,
     marginBottom: 12,
-    elevation: 1,
+    // elevation: 1,
   },
   updateHeader: {
     flexDirection: 'row',
@@ -458,7 +461,7 @@ const styles = StyleSheet.create({
   },
   updateDescription: {
     marginBottom: 4,
-    fontSize: 11
+    fontSize: 12.5
   },
   updateTime: {
     marginTop: 4,

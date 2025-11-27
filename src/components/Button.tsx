@@ -10,6 +10,7 @@ import {
 import { Colors, Spacing, BorderRadius, FontSizes, FontWeights, Shadows } from '../constants';
 import { ButtonProps } from '../types';
 import { Loader } from './Loader';
+import { Heading4, SmallText } from './Typography';
 
 export const Button: React.FC<ButtonProps> = ({
   title,
@@ -54,7 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
           <Loader size={24} color={getLoaderColor()} />
         </View>
       ) : (
-        <Text style={textStyle}>{title}</Text>
+        <Heading4 style={textStyle}>{title}</Heading4>
       )}
     </TouchableOpacity>
   );

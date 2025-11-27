@@ -20,6 +20,9 @@
         "googleSignIn": {
           "reservedClientId": "1:731804418402:ios:83ed3e6c1279885b742c3b"
         }
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -54,6 +57,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f6a4d6c4-2b34-4008-a013-561a018b1970"
+      }
     }
   }
 }

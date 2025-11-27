@@ -6,22 +6,32 @@ export default function AuthLayout() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuthStore();
 
-  useEffect(() => {
-    // If the user is already authenticated, redirect them to the tabs
-    if (isAuthenticated && !isLoading) {
-      router.replace('/(tabs)');
-    }
-  }, [isAuthenticated, isLoading, router]);
+  // Don't redirect here - let index.tsx handle it
+  // This prevents double navigation and white flashes
 
   return (
     <Stack
       screenOptions={{
         headerShown: false,
         animation: 'slide_from_right',
+        animationDuration: 250,
+        contentStyle: {
+          backgroundColor: '#1A0A00', // Match your gradient start color
+        },
       }}
     >
-      <Stack.Screen name="login" />
-      <Stack.Screen name="register" />
+      <Stack.Screen 
+        name="login"
+        options={{
+          animation: 'fade',
+        }}
+      />
+      <Stack.Screen 
+        name="register"
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
     </Stack>
   );
 }

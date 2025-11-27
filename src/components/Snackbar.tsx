@@ -73,7 +73,7 @@ export const Snackbar: React.FC<SnackbarProps> = ({
       case 'success':
         return Colors.success;
       case 'error':
-        return Colors.black;
+        return Colors.dark;
       case 'warning':
         return Colors.warning;
       case 'info':
@@ -124,13 +124,13 @@ export const Snackbar: React.FC<SnackbarProps> = ({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: Spacing.xl,
+    bottom: Spacing.xxl*1.2,
     left: Spacing.md,
     right: Spacing.md,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    shadowColor: '#000',
+    shadowColor: '#605e5eff',
     shadowOffset: {
       width: 0,
       height: 4,

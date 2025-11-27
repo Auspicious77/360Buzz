@@ -1,36 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, Link } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthTextInput, Snackbar, Typography, SmallText, ButtonText, Caption } from '../../src/components';
 import { useAuthStore } from '../../src/store';
 import { validateLoginForm, parseFirebaseError } from '../../src/utils';
 import { useSnackbar } from '../../src/hooks';
-import { Colors, Spacing, FontSizes, FontWeights, BorderRadius } from '../../src/constants';
+import { Colors } from '../../src/constants';
+import { Ionicons } from '@expo/vector-icons';
+
+const REMEMBER_ME_KEY = '@remember_me';
+const SAVED_EMAIL_KEY = '@saved_email';
+const SAVED_PASSWORD_KEY = '@saved_password';
+
+interface SavedCredentials {
+  email: string;
+  password: string;
+}
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, isLoading, isAuthenticated } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
   const { snackbar, showError, showSuccess, hideSnackbar } = useSnackbar();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [isLoadingCredentials, setIsLoadingCredentials] = useState(true);
 
-  // Redirect to tabs when authenticated
+  // Load saved credentials on mount
   useEffect(() => {
-    if (isLoggingIn && !isLoading && isAuthenticated) {
-      console.log('Login completed, redirecting to dashboard');
-      showSuccess('Login successful!');
-      setTimeout(() => {
-        router.replace('/(tabs)');
-        setIsLoggingIn(false);
-      }, 500);
+    loadSavedCredentials();
+  }, []);
+
+  const loadSavedCredentials = async () => {
+    try {
+      const [savedRememberMe, savedEmail, savedPassword] = await Promise.all([
+        AsyncStorage.getItem(REMEMBER_ME_KEY),
+        AsyncStorage.getItem(SAVED_EMAIL_KEY),
+        AsyncStorage.getItem(SAVED_PASSWORD_KEY),
+      ]);
+
+      if (savedRememberMe === 'true' && savedEmail && savedPassword) {
+        setEmail(savedEmail);
+        setPassword(savedPassword);
+        setRememberMe(true);
+        console.log('Loaded saved credentials');
+      }
+    } catch (error) {
+      console.error('Error loading saved credentials:', error);
+    } finally {
+      setIsLoadingCredentials(false);
     }
-  }, [isLoggingIn, isLoading, isAuthenticated]);
+  };
+
+  const saveCredentials = async (email: string, password: string) => {
+    try {
+      await Promise.all([
+        AsyncStorage.setItem(REMEMBER_ME_KEY, 'true'),
+        AsyncStorage.setItem(SAVED_EMAIL_KEY, email),
+        AsyncStorage.setItem(SAVED_PASSWORD_KEY, password),
+      ]);
+      console.log('Credentials saved');
+    } catch (error) {
+      console.error('Error saving credentials:', error);
+    }
+  };
+
+  const clearSavedCredentials = async () => {
+    try {
+      await Promise.all([
+        AsyncStorage.removeItem(REMEMBER_ME_KEY),
+        AsyncStorage.removeItem(SAVED_EMAIL_KEY),
+        AsyncStorage.removeItem(SAVED_PASSWORD_KEY),
+      ]);
+      console.log('Credentials cleared');
+    } catch (error) {
+      console.error('Error clearing credentials:', error);
+    }
+  };
 
   const handleLogin = async () => {
-    // Validate form
     const validationError = validateLoginForm(email, password);
     if (validationError) {
       showError(validationError);
@@ -38,15 +89,43 @@ export default function LoginScreen() {
     }
 
     try {
-      setIsLoggingIn(true);
       await login({ email, password });
+      
+      // Save or clear credentials based on remember me
+      if (rememberMe) {
+        await saveCredentials(email, password);
+      } else {
+        await clearSavedCredentials();
+      }
+      
+      showSuccess('Login successful!');
+      router.replace('/(tabs)');
     } catch (error: any) {
       console.error('Login error:', error);
-      setIsLoggingIn(false);
       const errorMessage = parseFirebaseError(error);
       showError(errorMessage);
     }
   };
+
+  // Show loading state while checking for saved credentials
+  if (isLoadingCredentials) {
+    return (
+      <LinearGradient
+        colors={['#1A0A00', '#4D2600', '#FF6B00']}
+        style={styles.wrapper}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      >
+        <View style={styles.loadingContainer}>
+          <Image
+            source={require('../../assets/Buzzlogo2.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
+      </LinearGradient>
+    );
+  }
 
   return (
     <LinearGradient
@@ -71,14 +150,18 @@ export default function LoginScreen() {
         </View>
 
         <View>
-          <Typography variant="h2" color="#FFFFFF" align="left" style={styles.loginTitle}>Login Account</Typography>
-          <SmallText color="#787878" align="left" style={styles.loginSubtitle}>Please login into your account</SmallText>
+          <Typography variant="h2" color="#FFFFFF" align="left" style={styles.loginTitle}>
+            Login Account
+          </Typography>
+          <SmallText color="#787878" align="left" style={styles.loginSubtitle}>
+            Please login into your account
+          </SmallText>
         </View>
 
-        {/* Form Container with White Background */}
+        {/* Form Container */}
         <View style={styles.formContainer}>
           <AuthTextInput
-          backgroundColor='#FFFFFF'
+            backgroundColor='#FFFFFF'
             icon="mail-outline"
             placeholder="steve.young@gmail.com"
             value={email}
@@ -90,26 +173,47 @@ export default function LoginScreen() {
           <AuthTextInput
             icon="lock-closed-outline"
             isPassword
-             backgroundColor='#FFFFFF'
+            backgroundColor='#FFFFFF'
             placeholder="••••••••"
             value={password}
             onChangeText={setPassword}
           />
 
-          <TouchableOpacity style={styles.forgotPassword}>
-            <SmallText weight="semibold" color={Colors.primary}>Forgot Password?</SmallText>
-          </TouchableOpacity>
+          <View style={styles.optionsRow}>
+            {/* Remember Me Checkbox */}
+            <TouchableOpacity
+              style={styles.rememberMeContainer}
+              onPress={() => setRememberMe(!rememberMe)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+                {rememberMe && (
+                  <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                )}
+              </View>
+              <SmallText color="#FFFFFF" style={styles.rememberMeText}>
+                Remember Me
+              </SmallText>
+            </TouchableOpacity>
+
+            {/* Forgot Password */}
+            <TouchableOpacity style={styles.forgotPassword}>
+              <SmallText weight="semibold" color={Colors.primary}>
+                Forgot Password?
+              </SmallText>
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.row}>
             <TouchableOpacity style={styles.socialButton}>
               <Image style={styles.image} source={require('../../assets/google.png')}/>
             </TouchableOpacity>
 
-             <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity style={styles.socialButton}>
               <Image style={styles.image} source={require('../../assets/facebook.png')}/>
             </TouchableOpacity>
 
-             <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity style={styles.socialButton}>
               <Image style={styles.image} source={require('../../assets/apple.png')}/>
             </TouchableOpacity>
           </View>
@@ -119,6 +223,7 @@ export default function LoginScreen() {
             style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
             onPress={handleLogin}
             disabled={isLoading}
+            activeOpacity={0.8}
           >
             <ButtonText color="#FFFFFF">
               {isLoading ? 'Logging in...' : 'Login Account'}
@@ -126,7 +231,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           {/* Terms */}
-          <Caption color="#FFFFFF" align="center"  style={styles.terms}>
+          <Caption color="#FFFFFF" align="center" style={styles.terms}>
             By "Login Account", you agree to the{' '}
             <Caption weight="semibold" color="#000000">Terms of Use</Caption>
             {' '}and{' '}
@@ -134,12 +239,14 @@ export default function LoginScreen() {
           </Caption>
         </View>
 
-        {/* Sign Up Link at Bottom */}
+        {/* Sign Up Link */}
         <View style={styles.signupContainer}>
           <SmallText color="#FFFFFF">Don't have an account? </SmallText>
           <Link href="/(auth)/register" asChild>
             <TouchableOpacity>
-              <SmallText weight="bold" color="#FFFFFF" style={styles.createAccountText}>Create Account</SmallText>
+              <SmallText weight="bold" color="#FFFFFF" style={styles.createAccountText}>
+                Create Account
+              </SmallText>
             </TouchableOpacity>
           </Link>
         </View>
@@ -166,8 +273,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 24,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   logoContainer: {
-    // alignItems: 'center',
     marginTop: 60,
     marginBottom: 40,
   },
@@ -176,7 +287,6 @@ const styles = StyleSheet.create({
     height: 70,
   },
   formContainer: {
-    // backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 0,
     marginBottom: 24,
@@ -187,9 +297,37 @@ const styles = StyleSheet.create({
   loginSubtitle: {
     marginBottom: 32,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
+  optionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 24,
+    marginTop: 8,
+  },
+  rememberMeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    backgroundColor: 'transparent',
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#FF6B00',
+    borderColor: '#FF6B00',
+  },
+  rememberMeText: {
+    marginLeft: 4,
+  },
+  forgotPassword: {
+    // No additional styles needed
   },
   loginButton: {
     backgroundColor: '#FF6B00',
@@ -214,7 +352,7 @@ const styles = StyleSheet.create({
   createAccountText: {
     textDecorationLine: 'underline',
   },
-  row:{
+  row: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -222,9 +360,7 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 16,
   },
-  socialButton:{
-    // width: 50,
-    // height: 50,
+  socialButton: {
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E7E7E7',

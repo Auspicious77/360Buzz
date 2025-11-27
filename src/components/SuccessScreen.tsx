@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, useWindowDimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Animated, useWindowDimensions, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography, Heading1, BodyText, SmallText, ButtonText } from './Typography';
 import { Colors, Spacing, FontSizes, FontWeights, BorderRadius } from '../constants';
@@ -11,6 +11,7 @@ interface SuccessScreenProps {
   subtitle?: string;
   buttonText?: string;
   onContinue?: () => void;
+  loading?: boolean
 }
 
 export const SuccessScreen: React.FC<SuccessScreenProps> = ({
@@ -20,6 +21,7 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({
   subtitle = "Let's start to exploring your experience",
   buttonText = 'Proceed to Dashboard',
   onContinue,
+  loading
 }) => {
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -64,8 +66,13 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({
         <TouchableOpacity 
           style={styles.button}
           onPress={onContinue || (() => {})}
+          disabled={loading}
         >
-          <ButtonText color="#FFFFFF">{buttonText}</ButtonText>
+          {
+            loading? <ActivityIndicator size={'small'} color={Colors.primary}/> :  
+            <ButtonText  color="#FFFFFF">{buttonText}</ButtonText>
+          }
+
         </TouchableOpacity>
       </Animated.View>
     </View>

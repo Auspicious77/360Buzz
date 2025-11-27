@@ -1,31 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, Link } from 'expo-router';
 import { CountryPicker } from 'react-native-country-codes-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { AuthTextInput, Snackbar, SmallText, SuccessScreen } from '../../src/components';
+import { AuthTextInput, Snackbar, SmallText, SuccessScreen, Heading2 } from '../../src/components';
 import { useAuthStore } from '../../src/store';
-import { parseFirebaseError } from '../../src/utils';
+import { parseFirebaseError, SCREEN_HEIGHT } from '../../src/utils';
 import { useSnackbar } from '../../src/hooks';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../src/config/firebase';
 
 interface FormState {
-  // Company Details
   companyName: string;
   jobTitle: string;
   firstName: string;
   lastName: string;
-  // Contact Information
   phoneNumber: string;
   countryCode: string;
   countryFlag: string;
   companyEmail: string;
   websiteUrl: string;
   country: string;
-  // Security
   password: string;
   confirmPassword: string;
-  // Agreements
   agreeEmails: boolean;
   agreeTerms: boolean;
 }
@@ -51,15 +49,15 @@ export default function RegisterScreen() {
   const router = useRouter();
   const { register, isLoading } = useAuthStore();
   const { snackbar, showError, hideSnackbar } = useSnackbar();
+  const [load, setLoad] = useState<boolean>(false)
+
   
-  // Consolidated form state
   const [formData, setFormData] = useState<FormState>(initialFormState);
-  
-  // UI states
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [registeredUserEmail, setRegisteredUserEmail] = useState('');
+  const [registeredUserPassword, setRegisteredUserPassword] = useState('');
 
-  // Update form field helper
   const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -91,7 +89,6 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    setShowSuccess(true);
     if (!validateForm()) return;
 
     const { firstName, lastName, companyEmail, companyName, jobTitle, websiteUrl, countryCode, phoneNumber, country, password } = formData;
@@ -100,8 +97,8 @@ export default function RegisterScreen() {
     try {
       console.log('Starting registration...');
       
-      // Register user - but don't wait for auth state to update
-      const response = await register({
+      // Register user - this now returns user data without updating global state
+      await register({
         fullName,
         email: companyEmail,
         companyName,
@@ -111,12 +108,14 @@ export default function RegisterScreen() {
         country,
         password,
       });
-
-      console.log('responseeee', response)
       
       console.log('Registration successful, showing success modal');
       
-      // Show success modal immediately after registration
+      // Store credentials for later login
+      setRegisteredUserEmail(companyEmail);
+      setRegisteredUserPassword(password);
+      
+      // Show success modal
       setShowSuccess(true);
     } catch (error) {
       console.error('Registration error:', error);
@@ -125,12 +124,31 @@ export default function RegisterScreen() {
     }
   };
 
-  const handleContinue = () => {
-    setShowSuccess(false);
-    // Navigate to tabs after user dismisses success modal
-    setTimeout(() => {
+
+  const handleContinue = async () => {
+    setLoad(true)
+    console.log('User clicked continue - logging in and navigating');
+    
+    
+    try {
+      // Now sign in the user to update the auth state
+      console.log('Signing in user after registration...');
+      await signInWithEmailAndPassword(auth, registeredUserEmail, registeredUserPassword);
+      setLoad(false)
+      setShowSuccess(false);
+      
+      // Small delay to allow auth state to update
+       router.replace('/(tabs)');
+      // setTimeout(() => {
+      //   console.log('Navigating to tabs...');
+      //   router.replace('/(tabs)');
+      // }, 500);
+    } catch (error) {
+      console.error('Error signing in after registration:', error);
+      // If login fails, just navigate anyway - the auth listener will handle it
       router.replace('/(tabs)');
-    }, 100);
+      setLoad(false)
+    }
   };
 
   return (
@@ -161,8 +179,8 @@ export default function RegisterScreen() {
 
         {/* Title */}
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Sign Up</Text>
-          <Text style={styles.subtitle}>Input all your details Below</Text>
+          <Heading2 style={styles.title}>Sign Up</Heading2>
+          <SmallText style={styles.subtitle}>Input all your details Below</SmallText>
         </View>
 
         {/* Company Details Section */}
@@ -353,7 +371,6 @@ export default function RegisterScreen() {
         lang='en'
         show={showCountryPicker}
         pickerButtonOnPress={(item) => {
-          console.log('Selected country:', item?.name?.en);
           setFormData(prev => ({
             ...prev,
             countryCode: item.dial_code,
@@ -365,7 +382,10 @@ export default function RegisterScreen() {
         onBackdropPress={() => setShowCountryPicker(false)}
         style={{
           modal: {
-            height: 650,
+            height: SCREEN_HEIGHT * 0.6,
+          },
+          countryMessageContainer: {
+            height: SCREEN_HEIGHT * 0.4,
           },
         }}
       />
@@ -384,6 +404,7 @@ export default function RegisterScreen() {
         subtitle="Let's start to exploring your experience"
         buttonText="Proceed to Dashboard"
         onContinue={handleContinue}
+        loading={load}
       />
     </LinearGradient>
   );
@@ -411,7 +432,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
     justifyContent: 'flex-end',
-    alignSelf: 'flex-end'
+    alignSelf: 'flex-end',
   },
   logo: {
     width: 200,
@@ -421,6 +442,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
+    fontFamily: 'DM-Sans',
+    lineHeight: 35,
     fontSize: 32,
     fontWeight: '700',
     color: '#FFFFFF',
@@ -428,6 +451,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
+    fontFamily: 'DM-Sans',
     color: '#CCCCCC',
   },
   section: {
@@ -474,12 +498,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: 'transparent',
-    width: '28%'
+    width: '28%',
   },
   countryCodeFlag: {
+    fontFamily: 'DM-Sans',
     fontSize: 15,
   },
   countryCodeText: {
+    fontFamily: 'DM-Sans-Regular',
     fontSize: 14,
     fontWeight: '500',
     color: '#333333',

@@ -11,7 +11,7 @@ const API_BASE_URL = __DEV__
 const API_TIMEOUT = 30000;
 
 /**
- * Create axios instance with default configuration
+ *  axios instance with default configuration
  */
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -22,11 +22,9 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 /**
- * Request interceptor to add auth token
- */
+ * Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // TODO: Get token from auth store and add to headers
     // const token = useAuthStore.getState().token;
     // if (token) {
     //   config.headers.Authorization = `Bearer ${token}`;
@@ -54,7 +52,6 @@ apiClient.interceptors.response.use(
     
     // Handle specific status codes
     if (error.response?.status === 401) {
-      // TODO: Handle unauthorized - logout user
       // useAuthStore.getState().logout();
     }
     

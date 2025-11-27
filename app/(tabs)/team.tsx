@@ -31,6 +31,7 @@ export default function TeamScreen() {
             </View>
 
             <View style={styles.content}>
+
                 <View style={styles.emptyState}>
                     <Heading2 color="#333333" style={styles.emptyTitle}>No Team Members Yet</Heading2>
                     <BodyText color="#999999" align="center" style={styles.emptyText}>
@@ -39,9 +40,15 @@ export default function TeamScreen() {
 
 
                 </View>
+
+
+
+
+           
             </View>
 
-            <View style={{ padding: 30 }}>
+
+                  <View style={{ padding: 30, marginTop: 100 }}>
                 <Button
                     title="Logout"
                     onPress={handleLogout}
@@ -49,6 +56,8 @@ export default function TeamScreen() {
                     fullWidth
                 />
             </View>
+
+           
 
 
             <ConfirmDialog
@@ -86,10 +95,11 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     content: {
-        flex: 1,
+        flex: 0.6,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 40,
+        // marginTop: 100
     },
     emptyState: {
         alignItems: 'center',

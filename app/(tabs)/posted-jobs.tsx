@@ -16,7 +16,7 @@ export default function PostedJobsScreen() {
 
       <View style={styles.content}>
         <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>📋</Text>
+          {/* <Text style={styles.emptyIcon}>📋</Text> */}
           <Heading2 color="#333333" style={styles.emptyTitle}>No Posted Jobs Yet</Heading2>
           <BodyText color="#999999" align="center" style={styles.emptyText}>
             Your posted jobs will appear here
