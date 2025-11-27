@@ -160,3 +160,27 @@ For assessment review or questions, please contact the developer.
 
 **Built for:** remoting.work React Native Developer Assessment  
 **Technologies:** React Native, Expo, Firebase, TypeScript
+
+
+### Here are the screenshots
+### Authentication Screens
+<p float="left">
+  <img src="./assets/screenshots/1.png" width="250" />
+  <img src="./assets/screenshots/2.png" width="250" />
+  <img src="./assets/screenshots/3.png" width="250" />
+  <img src="./assets/screenshots/6.png" width="250" />
+  <img src="./assets/screenshots/10.png" width="250" />
+</p>
+
+### Main Application Screens
+<p float="left">
+  <img src="./assets/screenshots/4.png" width="250" />
+  <img src="./assets/screenshots/5.png" width="250" />
+  <img src="./assets/screenshots/8.png" width="250" />
+  <img src="./assets/screenshots/9.png" width="250" />
+</p>
+
+## 🎥 Demo Video
+
+### App Walkthrough
+https://www.loom.com/share/fab18098ec8c4a5d8c0e2b3d01d7271e
